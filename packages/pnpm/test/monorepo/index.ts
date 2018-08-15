@@ -29,7 +29,7 @@ test('linking a package inside a monorepo', async (t: tape.Test) => {
     },
   ])
 
-  await writeYamlFile('pnpm-workspace.yaml', {packages: ['**']})
+  await writeYamlFile('pnpm-workspace.yaml', {packages: ['**', '!store/**']})
 
   process.chdir('project-1')
 

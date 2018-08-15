@@ -1,14 +1,16 @@
 import {PackageJson} from '@pnpm/types'
-import {
-  DependenciesType,
-  dependenciesTypes,
-  packageJsonLogger,
-} from '@pnpm/utils'
 import loadJsonFile = require('load-json-file')
 import path = require('path')
 import writePkg = require('write-pkg')
+import {
+  DependenciesType,
+  dependenciesTypes,
+} from './getSaveType'
+import {
+  packageJsonLogger,
+} from './loggers'
 
-export default async function save (
+export default async function upsertDependenciesToPackageJson (
   prefix: string,
   packageSpecs: Array<{
     name: string,

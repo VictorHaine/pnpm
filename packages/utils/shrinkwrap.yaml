@@ -2,17 +2,21 @@ dependencies:
   '@pnpm/package-bins': 1.0.0
   '@pnpm/read-package-json': 1.0.0
   '@pnpm/types': 1.7.0
+  '@types/load-json-file': 2.0.7
   '@types/mz': 0.0.32
   '@types/node': 10.7.0
   '@types/ramda': 0.25.34
+  '@types/write-pkg': 3.1.0
   dependency-path: 1.2.3
   fs-vacuum: 1.2.10
+  load-json-file: 5.0.0
   mz: 2.7.0
   package-store: 0.23.1
   pnpm-shrinkwrap: 7.0.1
   ramda: 0.25.0
   rimraf-then: 1.0.1
   util.promisify: 1.0.0
+  write-pkg: 3.2.0
 devDependencies:
   '@pnpm/logger': 2.1.0
   rimraf: 2.6.2
@@ -162,6 +166,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-JdO/UpPm9RrtQBNVcZdt3M7j3mHO/kXaea9LBGx3UgWJd1f9BkIWP7jObLBG6ZtRyqp7KzLFEsaPhWcidVittA==
+  /@types/write-pkg/3.1.0:
+    dev: false
+    resolution:
+      integrity: sha512-JRGsPEPCrYqTXU0Cr+Yu7esPBE2yvH7ucOHr+JuBy0F59kglPvO5gkmtyEvf3P6dASSkScvy/XQ6SC1QEBFDuA==
   /ansi-regex/2.1.1:
     dev: true
     engines:
@@ -1117,6 +1125,15 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-K2TIozAE1UuGmMdtWFp3zrYdoy8=
+  /write-pkg/3.2.0:
+    dependencies:
+      sort-keys: 2.0.0
+      write-json-file: 2.3.0
+    dev: false
+    engines:
+      node: '>=4'
+    resolution:
+      integrity: sha512-tX2ifZ0YqEFOF1wjRW2Pk93NLsj02+n1UP5RvO6rCs0K6R2g1padvf006cY74PQJKMGS2r42NK7FD0dG6Y6paw==
   /xtend/4.0.1:
     dev: true
     engines:
@@ -1131,11 +1148,14 @@ specifiers:
   '@pnpm/package-bins': ^1.0.0
   '@pnpm/read-package-json': ^1.0.0
   '@pnpm/types': ^1.7.0
+  '@types/load-json-file': ^2.0.7
   '@types/mz': ^0.0.32
   '@types/node': ^10.0.8
   '@types/ramda': 0.25.34
+  '@types/write-pkg': ^3.1.0
   dependency-path: ^1.2.3
   fs-vacuum: ^1.2.10
+  load-json-file: ^5.0.0
   mz: ^2.7.0
   package-store: ^0.23.0
   pnpm-shrinkwrap: ^7.0.1
@@ -1145,3 +1165,4 @@ specifiers:
   tslint: ^5.4.2
   typescript: ^3.0.0
   util.promisify: ^1.0.0
+  write-pkg: ^3.2.0

@@ -14,18 +14,18 @@ import {
 } from '@pnpm/types'
 import {
   dependenciesTypes,
+  getPref,
   getSaveType,
   packageJsonLogger,
   realNodeModulesDir,
-  rootLogger,
   safeReadPackageFromDir as safeReadPkgFromDir,
   skippedOptionalDependencyLogger,
   stageLogger,
   summaryLogger,
+  upsertDependenciesToPackageJson,
 } from '@pnpm/utils'
 import * as dp from 'dependency-path'
 import graphSequencer = require('graph-sequencer')
-import pFilter = require('p-filter')
 import pLimit = require('p-limit')
 import {
   StoreController,
@@ -48,7 +48,6 @@ import depsToSpecs, {similarDepsToSpecs} from '../depsToSpecs'
 import {absolutePathToRef} from '../fs/shrinkwrap'
 import getSpecFromPackageJson from '../getSpecFromPackageJson'
 import linkPackages, {DepGraphNodesByDepPath} from '../link'
-import {DepGraphNode} from '../link/resolvePeers'
 import {
   createNodeId,
   nodeIdContainsSequence,
@@ -57,7 +56,6 @@ import {
 import parseWantedDependencies from '../parseWantedDependencies'
 import resolveDependencies, {Pkg} from '../resolveDependencies'
 import safeIsInnerLink from '../safeIsInnerLink'
-import save from '../save'
 import {
   WantedDependency,
 } from '../types'
@@ -69,7 +67,6 @@ import getContext, {PnpmContext} from './getContext'
 import externalLink from './link'
 import lock from './lock'
 import shrinkwrapsEqual from './shrinkwrapsEqual'
-import getPref from './utils/getPref'
 
 const ENGINE_NAME = `${process.platform}-${process.arch}-node-${process.version.split('.')[0]}`
 
@@ -535,8 +532,7 @@ async function installInContext (
         })
       }
     }
-    const pkgJsonPath = path.join(ctx.prefix, 'package.json')
-    newPkg = await save(
+    newPkg = await upsertDependenciesToPackageJson(
       ctx.prefix,
       specsToUsert,
     )

@@ -1,3 +1,10 @@
+import {PackageJson} from '@pnpm/types'
+import {
+  DependenciesType,
+  getPref,
+  getSaveType,
+  upsertDependenciesToPackageJson,
+} from '@pnpm/utils'
 import pLimit = require('p-limit')
 import {StoreController} from 'package-store'
 import path = require('path')
@@ -13,6 +20,7 @@ import {cached as createStoreController} from '../createStoreController'
 import findWorkspacePackages from '../findWorkspacePackages'
 import getConfigs from '../getConfigs'
 import {PnpmOptions} from '../types'
+import {recursive} from './recursive'
 
 const installLimit = pLimit(4)
 
@@ -24,39 +32,52 @@ export default async (
 
   const storeControllerCache = new Map<string, Promise<{path: string, ctrl: StoreController}>>()
 
-  const store = await createStoreController(storeControllerCache, opts)
-  const linkOpts = Object.assign(opts, {
-    store: store.path,
-    storeController: store.ctrl,
-  })
-
   // pnpm link
   if (!input || !input.length) {
-    await linkToGlobal(cwd, linkOpts)
+    const s = await createStoreController(storeControllerCache, opts)
+    const lOpts = Object.assign(opts, {
+      store: s.path,
+      storeController: s.ctrl,
+    })
+    await linkToGlobal(cwd, lOpts)
     return
   }
 
   const [pkgPaths, pkgNames] = R.partition((inp) => inp.startsWith('.'), input)
 
   if (pkgNames.length) {
-    let globalPkgNames!: string[]
     if (opts.workspacePrefix) {
       const pkgs = await findWorkspacePackages(opts.workspacePrefix)
 
       const pkgsFoundInWorkspace = pkgs.filter((pkg) => pkgNames.indexOf(pkg.manifest.name) !== -1)
-      pkgsFoundInWorkspace.forEach((pkgFromWorkspace) => pkgPaths.push(pkgFromWorkspace.path))
+      const specsToUpsert = [] as Array<{name: string, pref: string, saveType: DependenciesType}>
+      const saveType = getSaveType(opts)
+      pkgsFoundInWorkspace.forEach((pkgFromWorkspace) => {
+        pkgPaths.push(pkgFromWorkspace.path)
+        specsToUpsert.push({
+          name: pkgFromWorkspace.manifest.name,
+          pref: getPref(pkgFromWorkspace.manifest.name, pkgFromWorkspace.manifest.name, pkgFromWorkspace.manifest.version, {
+            saveExact: opts.saveExact === true,
+            savePrefix: opts.savePrefix || '^',
+          }),
+          saveType: saveType as DependenciesType,
+        })
+      })
+      const linkedToPkg = pkgs.find((pkg) => pkg.path === opts.prefix) as {path: string, manifest: PackageJson}
+      linkedToPkg.manifest = await upsertDependenciesToPackageJson(opts.prefix, specsToUpsert)
 
-      if (pkgsFoundInWorkspace.length && !linkOpts.saveDev && !linkOpts.saveProd && !linkOpts.saveOptional) {
-        linkOpts.saveProd = true
-      }
-
-      globalPkgNames = pkgNames.filter((pkgName) => !pkgsFoundInWorkspace.some((pkgFromWorkspace) => pkgFromWorkspace.manifest.name === pkgName))
-    } else {
-      globalPkgNames = pkgNames
+      return recursive(pkgs, [], opts, 'link', 'link')
     }
+
     const globalPkgPath = pathAbsolute(opts.globalPrefix)
-    globalPkgNames.forEach((pkgName) => pkgPaths.push(path.join(globalPkgPath, 'node_modules', pkgName)))
+    pkgNames.forEach((pkgName) => pkgPaths.push(path.join(globalPkgPath, 'node_modules', pkgName)))
   }
+
+  const store = await createStoreController(storeControllerCache, opts)
+  const linkOpts = Object.assign(opts, {
+    store: store.path,
+    storeController: store.ctrl,
+  })
 
   await Promise.all(
     pkgPaths.map((prefix) => installLimit(async () => {

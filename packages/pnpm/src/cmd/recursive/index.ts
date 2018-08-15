@@ -1,4 +1,5 @@
 import logger from '@pnpm/logger'
+import {PackageJson} from '@pnpm/types'
 import camelcaseKeys = require('camelcase-keys')
 import graphSequencer = require('graph-sequencer')
 import minimatch = require('minimatch')
@@ -69,8 +70,17 @@ export default async (
   }
 
   const cwd = process.cwd()
-  let pkgs = await findWorkspacePackages(cwd)
+  const pkgs = await findWorkspacePackages(cwd)
+  return recursive(pkgs, input, opts, cmdFullName, cmd)
+}
 
+export async function recursive (
+  pkgs: Array<{path: string, manifest: PackageJson}>,
+  input: string[],
+  opts: PnpmOptions,
+  cmdFullName: string,
+  cmd: string,
+) {
   const pkgGraphResult = createPkgGraph(pkgs)
   if (opts.scope) {
     pkgGraphResult.graph = filterGraphByScope(pkgGraphResult.graph, opts.scope)

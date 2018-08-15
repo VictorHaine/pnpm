@@ -6,12 +6,14 @@ import {
   DependenciesType,
   dependenciesTypes,
   DependencyType,
+  getPref,
   getSaveType,
   packageJsonLogger,
   removeOrphanPackages as removeOrphanPkgs,
   rootLogger,
   safeReadPackage,
   summaryLogger,
+  upsertDependenciesToPackageJson,
 } from '@pnpm/utils'
 import loadJsonFile = require('load-json-file')
 import normalize = require('normalize-path')
@@ -27,12 +29,9 @@ import R = require('ramda')
 import symlinkDir = require('symlink-dir')
 import getSpecFromPackageJson from '../getSpecFromPackageJson'
 import readShrinkwrapFile from '../readShrinkwrapFiles'
-import save from '../save'
 import extendOptions, {
   InstallOptions,
 } from './extendInstallOptions'
-import {install} from './install'
-import getPref from './utils/getPref'
 
 export default async function link (
   linkFromPkgs: string[],
@@ -115,7 +114,7 @@ export default async function link (
   })
 
   if (opts.saveDev || opts.saveProd || opts.saveOptional) {
-    const newPkg = await save(opts.prefix, specsToUpsert)
+    const newPkg = await upsertDependenciesToPackageJson(opts.prefix, specsToUpsert)
     for (const specToUpsert of specsToUpsert) {
       updatedWantedShrinkwrap.specifiers[specToUpsert.name] = getSpecFromPackageJson(newPkg, specToUpsert.name) as string
     }

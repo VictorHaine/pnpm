@@ -1,3 +1,4 @@
+import getPref from './getPref'
 import getSaveType, {DependenciesType, dependenciesTypes} from './getSaveType'
 import {
   DependencyType,
@@ -22,12 +23,14 @@ import removeTopDependency from './removeTopDependency'
 import safeReadPackage from './safeReadPkg'
 import {fromDir as safeReadPackageFromDir} from './safeReadPkg'
 import readPackage from './safeReadPkg'
+import upsertDependenciesToPackageJson from './upsertDependenciesToPackageJson'
 
 export {
   DependencyType,
   DependenciesType,
   dependenciesTypes,
   getSaveType,
+  getPref,
   PackageJsonLog,
   packageJsonLogger,
   ProgressLog,
@@ -48,4 +51,5 @@ export {
   statsLogger,
   SummaryLog,
   summaryLogger,
+  upsertDependenciesToPackageJson,
 }
