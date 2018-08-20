@@ -27,6 +27,7 @@ export default async (
   } as RecursiveSummary
 
   const limitRun = pLimit(opts.workspaceConcurrency)
+  const stdio = opts.workspaceConcurrency === 1 ? 'inherit' : 'pipe'
 
   for (const chunk of chunks) {
     await Promise.all(chunk.map((prefix: string) =>
@@ -43,6 +44,7 @@ export default async (
             rawNpmConfig: opts.rawNpmConfig,
             rootNodeModulesDir: await realNodeModulesDir(prefix),
             unsafePerm: opts.unsafePerm || false,
+            stdio,
           }
           if (pkg.manifest.scripts[`pre${scriptName}`]) {
             await runLifecycleHooks(`pre${scriptName}`, pkg.manifest, lifecycleOpts)
